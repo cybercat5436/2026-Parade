@@ -11,7 +11,9 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LumynLED;
+import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -27,8 +29,8 @@ public class RobotContainer {
   public final LumynLED lumynLed = new LumynLED();
   public final DriveTrain driveTrain = new DriveTrain();
 
-  private double driveSpeed = 0;
-  private double turnSpeed = 0;
+  public double driveLimit = 0.4;
+  public double turnLimit = 0.3;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController =
@@ -56,11 +58,10 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    driveSpeed = -driverController.getLeftY() * 0.5;
-    turnSpeed = -driverController.getRightX() * 0.2;
-
-    driveTrain.driveCommand(driveSpeed, turnSpeed);
+    driveTrain.setDefaultCommand(new DriveCommand(() -> -driverController.getLeftY() * driveLimit, () -> driverController.getRightX() * turnLimit, driveTrain));
     
+    driverController.rightBumper().onTrue(new InstantCommand(() -> driveLimit = 0.7))
+      .onFalse(new InstantCommand(() -> driveLimit = 0.4));
   }
 
   /**
